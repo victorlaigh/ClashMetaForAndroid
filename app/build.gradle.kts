@@ -45,9 +45,20 @@ task("downloadGeoFiles") {
     )
 
     doLast {
+        if (project.hasProperty("skipGeo")) {
+            println("Skipping downloadGeoFiles as requested by skipGeo property.")
+            return@doLast
+        }
+
         geoFilesUrls.forEach { (downloadUrl, outputFileName) ->
             val url = URL(downloadUrl)
             val outputPath = file("$geoFilesDownloadDir/$outputFileName")
+
+            if (outputPath.exists() && outputPath.length() > 0) {
+                println("$outputFileName already exists, skipping download.")
+                return@forEach
+            }
+
             outputPath.parentFile.mkdirs()
             url.openStream().use { input ->
                 Files.copy(input, outputPath.toPath(), StandardCopyOption.REPLACE_EXISTING)

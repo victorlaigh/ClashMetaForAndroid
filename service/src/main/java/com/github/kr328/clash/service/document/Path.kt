@@ -8,7 +8,7 @@ data class Path(
     val relative: List<String>?
 ) {
     enum class Scope {
-        Configuration, Providers
+        Configuration, ConfigurationRaw, AYaml, Providers
     }
 
     override fun toString(): String {
@@ -20,6 +20,8 @@ data class Path(
 
         val sc = when (scope) {
             Scope.Configuration -> Paths.CONFIGURATION_ID
+            Scope.ConfigurationRaw -> Paths.CONFIGURATION_RAW_ID
+            Scope.AYaml -> Paths.A_YAML_ID
             Scope.Providers -> Paths.PROVIDERS_ID
         }
 

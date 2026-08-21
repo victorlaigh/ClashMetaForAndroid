@@ -1,5 +1,5 @@
 [versions]
-agp = "8.8.0"
+agp = "8.13.2"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
 golang = "1.0.4"
@@ -17,6 +17,7 @@ kaidl = "1.15"
 room = "2.4.2"
 multiprocess = "1.0.0"
 quickie = "1.11.0"
+snakeyaml = "1.33"
 androidx-activity-ktx = "1.9.0"
 
 [libraries]
@@ -27,6 +28,7 @@ build-ksp = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin"
 build-golang = { module = "com.github.kr328.golang:gradle-plugin", version.ref = "golang" }
 kotlin-coroutine = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutine" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activity" }
 androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
