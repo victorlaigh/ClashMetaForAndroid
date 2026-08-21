@@ -167,6 +167,10 @@
     <string name="browse_files">浏览文件</string>
     <string name="browse_configuration_providers">浏览配置文件和外部资源</string>
     <string name="rename">重命名</string>
+    <string name="a_yaml_content">a.yaml 内容</string>
+    <string name="save_a_yaml">保存 a.yaml</string>
+    <string name="saved_to_a_yaml">已保存至 a.yaml</string>
+    <string name="rules_label">自定义规则：</string>
     <string name="file_name">文件名</string>
     <string name="format_type_unsaved">%s (未保存)</string>
     <string name="format_minutes_ago">%d 分钟前</string>
@@ -243,7 +247,6 @@
     <string name="find_process_mode">查找进程模式</string>
     <string name="sniffer_setting">嗅探设置</string>
     <string name="sniffer">嗅探器</string>
-    <string name="sniff">嗅探</string>
     <string name="force_dns_mapping">强制 DNS 映射</string>
     <string name="parse_pure_ip">解析纯 IP 连接</string>
     <string name="override_destination">覆盖目标地址</string>

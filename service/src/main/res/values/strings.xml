@@ -15,6 +15,8 @@
     <string name="clash_meta_for_android">Clash Meta for Android</string>
     <string name="profiles_and_providers">Profiles and Providers</string>
     <string name="configuration_yaml">Configuration.yaml</string>
+    <string name="configuration_raw_yaml">Configuration.yaml.raw</string>
+    <string name="a_yaml">a.yaml</string>
     <string name="provider_files">Provider Files</string>
     <string name="profile_updater">Profile Updater</string>
     <string name="profile_updating">Profile Updating</string>

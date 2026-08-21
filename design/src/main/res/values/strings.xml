@@ -278,6 +278,10 @@
     <string name="browse_files">Browse Files</string>
     <string name="browse_configuration_providers"><![CDATA[Browse configuration & providers]]></string>
     <string name="rename">Rename</string>
+    <string name="a_yaml_content">a.yaml content</string>
+    <string name="save_a_yaml">Save a.yaml</string>
+    <string name="saved_to_a_yaml">Saved to a.yaml</string>
+    <string name="rules_label">Rules:</string>
     <string name="file_name">File Name</string>
     <string name="invalid_file_name">Invalid file name</string>
 

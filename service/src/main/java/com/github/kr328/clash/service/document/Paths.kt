@@ -4,6 +4,8 @@ import java.util.*
 
 object Paths {
     const val CONFIGURATION_ID = "config.yaml"
+    const val CONFIGURATION_RAW_ID = "config.yaml.raw"
+    const val A_YAML_ID = "a.yaml"
     const val PROVIDERS_ID = "providers"
 
     fun resolve(path: String): Path {
@@ -24,6 +26,8 @@ object Paths {
                 uuid = UUID.fromString(segments[0]),
                 scope = when (segments[1]) {
                     CONFIGURATION_ID -> Path.Scope.Configuration
+                    CONFIGURATION_RAW_ID -> Path.Scope.ConfigurationRaw
+                    A_YAML_ID -> Path.Scope.AYaml
                     PROVIDERS_ID -> Path.Scope.Providers
                     else -> throw IllegalArgumentException("unknown scope ${segments[1]}")
                 },
@@ -33,6 +37,8 @@ object Paths {
                 uuid = UUID.fromString(segments[0]),
                 scope = when (segments[1]) {
                     CONFIGURATION_ID -> Path.Scope.Configuration
+                    CONFIGURATION_RAW_ID -> Path.Scope.ConfigurationRaw
+                    A_YAML_ID -> Path.Scope.AYaml
                     PROVIDERS_ID -> Path.Scope.Providers
                     else -> throw IllegalArgumentException("unknown scope ${segments[1]}")
                 },

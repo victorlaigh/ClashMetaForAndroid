@@ -21,8 +21,13 @@ class Picker(private val context: Context) {
         }
 
         if (path.scope == null) {
-            return listOf(Path.Scope.Configuration, Path.Scope.Providers).map {
-                pick(path.copy(scope = it), false)
+            return listOf(
+                Path.Scope.Configuration,
+                Path.Scope.ConfigurationRaw,
+                Path.Scope.AYaml,
+                Path.Scope.Providers
+            ).mapNotNull {
+                runCatching { pick(path.copy(scope = it), false) }.getOrNull()
             }
         }
 
@@ -71,39 +76,71 @@ class Picker(private val context: Context) {
         }
 
         if (path.relative == null) {
-            if (path.scope == Path.Scope.Configuration) {
-                val type = pending?.type ?: imported?.type
-                ?: throw FileNotFoundException("profile not found")
+            when (path.scope) {
+                Path.Scope.Configuration -> {
+                    val type = pending?.type ?: imported?.type
+                    ?: throw FileNotFoundException("profile not found")
 
-                if (writable && type != Profile.Type.File)
-                    throw IllegalArgumentException("invalid open mode")
+                    if (writable && type != Profile.Type.File)
+                        throw IllegalArgumentException("invalid open mode")
 
-                val flags: Set<Flag> = if (type == Profile.Type.Url)
-                    emptySet()
-                else
-                    setOf(Flag.Writable)
+                    val flags: Set<Flag> = if (type == Profile.Type.Url)
+                        emptySet()
+                    else
+                        setOf(Flag.Writable)
 
-                return FileDocument(
-                    file = when {
+                    return FileDocument(
+                        file = when {
+                            pending != null -> context.pendingDir.resolve(pending.uuid.toString())
+                            imported != null -> context.importedDir.resolve(imported.uuid.toString())
+                            else -> throw FileNotFoundException("profile not found")
+                        }.resolve("config.yaml"),
+                        flags = flags,
+                        idOverride = Paths.CONFIGURATION_ID,
+                        nameOverride = context.getString(R.string.configuration_yaml)
+                    )
+                }
+                Path.Scope.ConfigurationRaw -> {
+                    val file = when {
                         pending != null -> context.pendingDir.resolve(pending.uuid.toString())
                         imported != null -> context.importedDir.resolve(imported.uuid.toString())
                         else -> throw FileNotFoundException("profile not found")
-                    }.resolve("config.yaml"),
-                    flags = flags,
-                    idOverride = Paths.CONFIGURATION_ID,
-                    nameOverride = context.getString(R.string.configuration_yaml)
-                )
-            } else {
-                return FileDocument(
-                    file = when {
-                        pending != null -> context.pendingDir.resolve(pending.uuid.toString())
-                        imported != null -> context.importedDir.resolve(imported.uuid.toString())
-                        else -> throw FileNotFoundException("profile not found")
-                    }.resolve("providers"),
-                    idOverride = Paths.PROVIDERS_ID,
-                    nameOverride = context.getString(R.string.provider_files),
-                    flags = setOf(Flag.Virtual)
-                )
+                    }.resolve("config.yaml.raw")
+
+                    if (!file.exists())
+                        throw FileNotFoundException("raw configuration not found")
+
+                    return FileDocument(
+                        file = file,
+                        flags = emptySet(), // Raw is read-only
+                        idOverride = Paths.CONFIGURATION_RAW_ID,
+                        nameOverride = context.getString(R.string.configuration_raw_yaml)
+                    )
+                }
+                Path.Scope.AYaml -> {
+                    return FileDocument(
+                        file = when {
+                            pending != null -> context.pendingDir.resolve(pending.uuid.toString())
+                            imported != null -> context.importedDir.resolve(imported.uuid.toString())
+                            else -> throw FileNotFoundException("profile not found")
+                        }.resolve("a.yaml"),
+                        flags = setOf(Flag.Writable, Flag.Deletable),
+                        idOverride = Paths.A_YAML_ID,
+                        nameOverride = context.getString(R.string.a_yaml)
+                    )
+                }
+                Path.Scope.Providers -> {
+                    return FileDocument(
+                        file = when {
+                            pending != null -> context.pendingDir.resolve(pending.uuid.toString())
+                            imported != null -> context.importedDir.resolve(imported.uuid.toString())
+                            else -> throw FileNotFoundException("profile not found")
+                        }.resolve("providers"),
+                        idOverride = Paths.PROVIDERS_ID,
+                        nameOverride = context.getString(R.string.provider_files),
+                        flags = setOf(Flag.Virtual)
+                    )
+                }
             }
         }
 

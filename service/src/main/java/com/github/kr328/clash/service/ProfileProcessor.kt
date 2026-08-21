@@ -3,7 +3,9 @@ package com.github.kr328.clash.service
 import android.content.Context
 import android.net.Uri
 import com.github.kr328.clash.common.log.Log
+import com.github.kr328.clash.common.util.YamlUtils
 import com.github.kr328.clash.core.Clash
+import java.io.File
 import com.github.kr328.clash.core.model.FetchStatus
 import com.github.kr328.clash.service.data.Imported
 import com.github.kr328.clash.service.data.ImportedDao
@@ -49,6 +51,8 @@ object ProfileProcessor {
 
                 val force = snapshot.type != Profile.Type.File
                 val subscriptionInfo = fetchProfile(context, snapshot.source, force, callback)
+
+                mergeIfPresent(context.processingDir)
 
                 profileLock.withLock {
                     if (PendingDao().queryByUUID(snapshot.uuid) == snapshot) {
@@ -108,6 +112,8 @@ object ProfileProcessor {
                 Clash.setAgeSecretKey(snapshot.ageSecretKey?.takeIf { it.isNotBlank() })
 
                 val subscriptionInfo = fetchProfile(context, snapshot.source, true, callback)
+
+                mergeIfPresent(context.processingDir)
 
                 profileLock.withLock {
                     val imported = ImportedDao().queryByUUID(snapshot.uuid)
@@ -199,6 +205,16 @@ object ProfileProcessor {
                     context.sendProfileChanged(uuid)
                 }
             }
+        }
+    }
+
+    private fun mergeIfPresent(dir: File) {
+        val aFile = dir.resolve("a.yaml")
+        val configFile = dir.resolve("config.yaml")
+
+        if (aFile.exists() && configFile.exists()) {
+            YamlUtils.resetRaw(configFile)
+            YamlUtils.mergeYaml(aFile, configFile)
         }
     }
 

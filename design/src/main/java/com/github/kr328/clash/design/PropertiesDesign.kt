@@ -21,6 +21,7 @@ class PropertiesDesign(context: Context) : Design<PropertiesDesign.Request>(cont
     sealed class Request {
         object Commit : Request()
         object BrowseFiles : Request()
+        data class SaveYaml(val content: String) : Request()
     }
 
     private val binding = DesignPropertiesBinding
@@ -37,6 +38,12 @@ class PropertiesDesign(context: Context) : Design<PropertiesDesign.Request>(cont
 
     val progressing: Boolean
         get() = binding.processing
+
+    var yamlContent: String?
+        get() = binding.yamlContent
+        set(value) {
+            binding.yamlContent = value
+        }
 
     suspend fun withProcessing(executeTask: suspend (suspend (FetchStatus) -> Unit) -> Unit) {
         try {
@@ -164,6 +171,10 @@ class PropertiesDesign(context: Context) : Design<PropertiesDesign.Request>(cont
 
     fun requestBrowseFiles() {
         requests.trySend(Request.BrowseFiles)
+    }
+
+    fun requestSaveYaml(content: String?) {
+        requests.trySend(Request.SaveYaml(content ?: ""))
     }
 
     private fun ModelProgressBarConfigure.applyFrom(status: FetchStatus) {
