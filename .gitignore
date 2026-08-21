@@ -1,8 +1,12 @@
 .gradle
 build/
+*.apk
+*.aab
 /app/foss/release
 /app/premium/release
 /captures
+
+
 
 # Ignore Gradle GUI config
 gradle-app.setting
