@@ -6,6 +6,8 @@ build/
 /app/premium/release
 /captures
 
+
+
 # Ignore Gradle GUI config
 gradle-app.setting
 
