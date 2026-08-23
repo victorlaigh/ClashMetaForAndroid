@@ -87,31 +87,39 @@ object YamlUtils {
         for ((key, sourceValue) in source) {
             val targetValue = target[key]
 
-            when {
-                (sourceValue is List<*>) && (targetValue is List<*>) -> {
-                    val mergedList = targetValue.toMutableList()
-                    
-                    // Convert to a fresh List to avoid any IOBE from view manipulation during iteration
-                    val items = sourceValue.toList()
-                    
-                    items.asReversed().forEach { item ->
-                        if (item is Map<*, *>) {
-                            val name = item["name"]
-                            if (name != null) {
-                                mergedList.removeAll { (it is Map<*, *>) && (it["name"] == name) }
+            when (sourceValue) {
+                is List<*> -> {
+                    if (targetValue is List<*>) {
+                        val mergedList = targetValue.toMutableList()
+
+                        // Convert to a fresh List to avoid any IOBE from view manipulation during iteration
+                        val items = sourceValue.toList()
+
+                        items.asReversed().forEach { item ->
+                            if (item is Map<*, *>) {
+                                val name = item["name"]
+                                if (name != null) {
+                                    mergedList.removeAll { (it is Map<*, *>) && (it["name"] == name) }
+                                }
+                            } else {
+                                mergedList.remove(item)
                             }
-                        } else {
-                            mergedList.remove(item)
+                            mergedList.add(0, item)
                         }
-                        mergedList.add(0, item)
+
+                        target[key] = mergedList
+                    } else {
+                        target[key] = sourceValue
                     }
-                    
-                    target[key] = mergedList
                 }
-                (sourceValue is Map<*, *>) && (targetValue is Map<*, *>) -> {
-                    val newMap = (targetValue as Map<String, Any?>).toMutableMap()
-                    mergeMaps(sourceValue as Map<String, Any?>, newMap)
-                    target[key] = newMap
+                is Map<*, *> -> {
+                    if (targetValue is Map<*, *>) {
+                        val newMap = (targetValue as Map<String, Any?>).toMutableMap()
+                        mergeMaps(sourceValue as Map<String, Any?>, newMap)
+                        target[key] = newMap
+                    } else {
+                        target[key] = sourceValue
+                    }
                 }
                 else -> {
                     target[key] = sourceValue

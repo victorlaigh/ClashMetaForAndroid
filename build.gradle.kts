@@ -1,9 +1,9 @@
-@file:Suppress("UNUSED_VARIABLE")
+@file:Suppress("UNUSED_VARIABLE", "DEPRECATION")
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.plugins.BasePluginExtension
-import java.net.URL
+import java.net.URI
 import java.util.*
 
 buildscript {
@@ -30,7 +30,7 @@ subprojects {
 
     val isApp = name == "app"
 
-    apply(plugin = if (isApp) "com.android.application" else "com.android.library")
+    pluginManager.apply(if (isApp) "com.android.application" else "com.android.library")
 
     fun queryConfigProperty(key: String): Any? {
         val localProperties = Properties()
@@ -63,7 +63,7 @@ subprojects {
             versionCode = 211033
 
             resValue("string", "release_name", "v$versionName")
-            resValue("integer", "release_code", "$versionCode")
+            resValue("integer", "release_code", versionCode.toString())
 
             ndk {
                 abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
@@ -71,7 +71,8 @@ subprojects {
 
             externalNativeBuild {
                 cmake {
-                    abiFilters("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                    //abiFilters("arm64-v8a", "armeabi-v7a", "x86", "x86_64") 换了新写法适应新版AGP
+                    abiFilters += setOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
                 }
             }
 
@@ -165,7 +166,7 @@ subprojects {
 
         buildFeatures.apply {
             dataBinding {
-                isEnabled = name != "hideapi"
+                enable = name != "hideapi"
             }
         }
 
@@ -190,26 +191,27 @@ subprojects {
 
     if (isApp) {
         extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
-            sourceSets.getByName("meta").java.srcDirs("src/foss/java")
-            sourceSets.getByName("alpha").java.srcDirs("src/foss/java")
+            sourceSets.getByName("meta").java.directories.add("src/foss/java")
+            sourceSets.getByName("alpha").java.directories.add("src/foss/java")
         }
     } else {
         extensions.configure<com.android.build.api.dsl.LibraryExtension> {
-            sourceSets.getByName("meta").java.srcDirs("src/foss/java")
-            sourceSets.getByName("alpha").java.srcDirs("src/foss/java")
+            sourceSets.getByName("meta").java.directories.add("src/foss/java")
+            sourceSets.getByName("alpha").java.directories.add("src/foss/java")
         }
     }
 }
 
-task("clean", type = Delete::class) {
-    delete(rootProject.buildDir)
+tasks.register<Delete>("clean") {
+    description = "Deletes the build directory of the root project."
+    delete(rootProject.layout.buildDirectory)
 }
 
 tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 
     doLast {
-        val sha256 = URL("$distributionUrl.sha256").openStream()
+        val sha256 = URI("$distributionUrl.sha256").toURL().openStream()
             .use { it.reader().readText().trim() }
 
         file("gradle/wrapper/gradle-wrapper.properties")

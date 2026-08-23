@@ -17,7 +17,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
-import java.io.File
 import com.github.kr328.clash.design.R
 
 class PropertiesActivity : BaseActivity<PropertiesDesign>() {
@@ -52,13 +51,13 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
         }
 
         while (isActive) {
-            select<Unit> {
+            select {
                 events.onReceive {
                     when (it) {
                         Event.ActivityStop -> {
                             val profile = design.profile
 
-                            if (!canceled && profile != original) {
+                            if (!canceled && (profile != original)) {
                                 withProfile {
                                     patch(profile.uuid, profile.name, profile.source, profile.interval, profile.ageSecretKey)
                                 }
@@ -132,11 +131,13 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         design?.apply {
             launch {
                 if (!progressing) {
-                    if (original == profile || requestExitWithoutSaving())
+                    if ((original == profile) || requestExitWithoutSaving())
                         finish()
                 }
             }

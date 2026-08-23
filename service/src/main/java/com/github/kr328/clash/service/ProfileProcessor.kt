@@ -1,7 +1,7 @@
 package com.github.kr328.clash.service
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.common.util.YamlUtils
 import com.github.kr328.clash.core.Clash
@@ -61,7 +61,7 @@ object ProfileProcessor {
 
                         val old = ImportedDao().queryByUUID(snapshot.uuid)
                         val updateInterval = subscriptionInfo?.subUpdateInterval
-                            ?.takeIf { old == null && snapshot.interval == 0L }
+                            ?.takeIf { (old == null) && (snapshot.interval == 0L) }
                             ?: snapshot.interval
                         val new = Imported(
                             snapshot.uuid,
@@ -74,7 +74,7 @@ object ProfileProcessor {
                             subscriptionInfo?.subTotal ?: 0,
                             subscriptionInfo?.subExpire ?: 0,
                             old?.createdAt ?: System.currentTimeMillis(),
-                            ageSecretKey = snapshot.ageSecretKey
+                            ageSecretKey = snapshot.ageSecretKey,
                         )
                         if (old != null) {
                             ImportedDao().update(new)
@@ -111,7 +111,7 @@ object ProfileProcessor {
 
                 Clash.setAgeSecretKey(snapshot.ageSecretKey?.takeIf { it.isNotBlank() })
 
-                val subscriptionInfo = fetchProfile(context, snapshot.source, true, callback)
+                val subscriptionInfo = fetchProfile(context, snapshot.source, force = true, callback)
 
                 mergeIfPresent(context.processingDir)
 
@@ -121,8 +121,7 @@ object ProfileProcessor {
                         context.importedDir.resolve(snapshot.uuid.toString()).deleteRecursively()
                         context.processingDir.copyRecursively(context.importedDir.resolve(snapshot.uuid.toString()))
 
-                        val upload = subscriptionInfo?.subUpload
-                        if (upload != null) {
+                        subscriptionInfo?.subUpload?.let { upload ->
                             ImportedDao().update(
                                 imported.copy(
                                     upload = upload,
@@ -222,7 +221,7 @@ object ProfileProcessor {
     }
 
     private fun Pending.enforceFieldValid() {
-        val scheme = Uri.parse(source)?.scheme?.lowercase(Locale.getDefault())
+        val scheme = source.toUri().scheme?.lowercase(Locale.getDefault())
 
         when {
             name.isBlank() -> throw IllegalArgumentException("Empty name")
