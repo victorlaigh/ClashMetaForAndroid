@@ -35,7 +35,8 @@ tasks.getByName("clean", type = Delete::class) {
 
 val geoFilesDownloadDir = "src/main/assets"
 
-task("downloadGeoFiles") {
+//task("downloadGeoFiles") { 改成新语法
+tasks.register("downloadGeoFiles") {
 
     val geoFilesUrls = mapOf(
         "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb" to "geoip.metadb",
