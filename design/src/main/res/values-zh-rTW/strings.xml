@@ -159,6 +159,10 @@
     <string name="browse_files">瀏覽檔案</string>
     <string name="browse_configuration_providers">瀏覽設定檔和外部資源</string>
     <string name="rename">重新命名</string>
+    <string name="a_yaml_content">a.yaml 內容</string>
+    <string name="save_a_yaml">儲存 a.yaml</string>
+    <string name="saved_to_a_yaml">已儲存至 a.yaml</string>
+    <string name="a_yaml_merge_error">a.yaml 合併失敗</string>
     <string name="file_name">檔名</string>
     <string name="format_type_unsaved">%s (未儲存)</string>
     <string name="format_minutes_ago">%d 分鐘前</string>

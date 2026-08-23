@@ -278,6 +278,7 @@
     <string name="a_yaml_content">a.yaml content</string>
     <string name="save_a_yaml">Save a.yaml</string>
     <string name="saved_to_a_yaml">Saved to a.yaml</string>
+    <string name="a_yaml_merge_error">a.yaml merge failed</string>
     <string name="rules_label">Rules:</string>
     <string name="file_name">File Name</string>
     <string name="invalid_file_name">Invalid file name</string>

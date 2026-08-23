@@ -2,6 +2,7 @@
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
+import org.gradle.api.plugins.BasePluginExtension
 import java.net.URL
 import java.util.*
 
@@ -55,7 +56,7 @@ subprojects {
                 else "com.github.kr328.clash.$name"
             }
 
-            minSdk = 21
+            minSdk = 23
             targetSdk = 35
 
             versionName = "2.11.33"
@@ -77,7 +78,7 @@ subprojects {
             if (!isApp) {
                 consumerProguardFiles("consumer-rules.pro")
             } else {
-                setProperty("archivesBaseName", "cmfa-$versionName")
+                project.extensions.getByType(BasePluginExtension::class.java).archivesName.set("cmfa-$versionName")
             }
         }
 
@@ -130,14 +131,6 @@ subprojects {
             }
         }
 
-        sourceSets {
-            getByName("meta") {
-                java.srcDirs("src/foss/java")
-            }
-            getByName("alpha") {
-                java.srcDirs("src/foss/java")
-            }
-        }
 
         signingConfigs {
             val keystore = rootProject.file("signing.properties")
@@ -192,6 +185,18 @@ subprojects {
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_21
             targetCompatibility = JavaVersion.VERSION_21
+        }
+    }
+
+    if (isApp) {
+        extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
+            sourceSets.getByName("meta").java.srcDirs("src/foss/java")
+            sourceSets.getByName("alpha").java.srcDirs("src/foss/java")
+        }
+    } else {
+        extensions.configure<com.android.build.api.dsl.LibraryExtension> {
+            sourceSets.getByName("meta").java.srcDirs("src/foss/java")
+            sourceSets.getByName("alpha").java.srcDirs("src/foss/java")
         }
     }
 }

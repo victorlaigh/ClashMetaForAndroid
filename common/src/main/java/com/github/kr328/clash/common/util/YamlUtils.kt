@@ -77,6 +77,8 @@ object YamlUtils {
             configFile.writeText(yaml.dump(merged), StandardCharsets.UTF_8)
         } catch (e: Throwable) {
             Log.w("YamlUtils: Merge failed, original file preserved. Error: ${e.javaClass.simpleName} - ${e.message}", e)
+            
+            throw e
         }
     }
 

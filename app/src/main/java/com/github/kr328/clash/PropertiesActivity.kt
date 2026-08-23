@@ -85,23 +85,39 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
                                     val pending = pendingDir.resolve(uuid.toString())
                                     val imported = importedDir.resolve(uuid.toString())
 
+                                    var mergeError = false
+
                                     if (pending.exists()) {
                                         val aFile = pending.resolve("a.yaml")
                                         val configFile = pending.resolve("config.yaml")
-                                        
+
                                         aFile.writeText(content)
-                                        YamlUtils.mergeYaml(aFile, configFile)
+
+                                        try {
+                                            YamlUtils.mergeYaml(aFile, configFile)
+                                        } catch (_: Exception) {
+                                            mergeError = true
+                                        }
                                     }
                                     if (imported.exists()) {
                                         val aFile = imported.resolve("a.yaml")
                                         val configFile = imported.resolve("config.yaml")
 
                                         aFile.writeText(content)
-                                        YamlUtils.mergeYaml(aFile, configFile)
+
+                                        try {
+                                            YamlUtils.mergeYaml(aFile, configFile)
+                                        } catch (_: Exception) {
+                                            mergeError = true
+                                        }
                                     }
 
                                     withContext(Dispatchers.Main) {
                                         design.showToast(R.string.saved_to_a_yaml, ToastDuration.Short)
+
+                                        if (mergeError) {
+                                            design.showToast(R.string.a_yaml_merge_error, ToastDuration.Long)
+                                        }
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
@@ -156,7 +172,10 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
                                         
                                         YamlUtils.resetRaw(configFile)
                                         if (aFile.exists()) {
-                                            YamlUtils.mergeYaml(aFile, configFile)
+                                            try {
+                                                YamlUtils.mergeYaml(aFile, configFile)
+                                            } catch (_: Exception) {
+                                            }
                                         }
                                     }
                                 }

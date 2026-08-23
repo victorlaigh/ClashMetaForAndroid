@@ -170,6 +170,7 @@
     <string name="a_yaml_content">a.yaml 内容</string>
     <string name="save_a_yaml">保存 a.yaml</string>
     <string name="saved_to_a_yaml">已保存至 a.yaml</string>
+    <string name="a_yaml_merge_error">a.yaml 合并失败</string>
     <string name="rules_label">自定义规则：</string>
     <string name="file_name">文件名</string>
     <string name="format_type_unsaved">%s (未保存)</string>

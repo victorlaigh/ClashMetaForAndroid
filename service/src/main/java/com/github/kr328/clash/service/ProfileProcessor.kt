@@ -214,7 +214,10 @@ object ProfileProcessor {
 
         if (aFile.exists() && configFile.exists()) {
             YamlUtils.resetRaw(configFile)
-            YamlUtils.mergeYaml(aFile, configFile)
+            try {
+                YamlUtils.mergeYaml(aFile, configFile)
+            } catch (_: Exception) {
+            }
         }
     }
 
