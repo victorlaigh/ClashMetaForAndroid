@@ -81,3 +81,10 @@ afterEvaluate {
 tasks.getByName("clean", type = Delete::class) {
     delete(file(geoFilesDownloadDir))
 }
+
+configure<com.android.build.api.dsl.ApplicationExtension> {
+    androidResources {
+        // 最新的語系過濾 API，絕不報錯與棄用
+        localeFilters.addAll(listOf("en", "zh-rTW", "zh"))
+    }
+}
