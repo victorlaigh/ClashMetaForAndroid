@@ -1,4 +1,5 @@
-import java.net.URL
+//import java.net.URL 旧版用的
+import java.net.URI //新语法需要
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -51,7 +52,9 @@ task("downloadGeoFiles") {
         }
 
         geoFilesUrls.forEach { (downloadUrl, outputFileName) ->
-            val url = URL(downloadUrl)
+            //val url = URL(downloadUrl) 更新成新语法
+            val url = URI(downloadUrl).toURL()
+
             val outputPath = file("$geoFilesDownloadDir/$outputFileName")
 
             if (outputPath.exists() && outputPath.length() > 0) {
