@@ -59,8 +59,8 @@ subprojects {
             minSdk = 23
             targetSdk = 35
 
-            versionName = "2.11.33"
-            versionCode = 211033
+            versionName = "2.11.3388"
+            versionCode = 21103388
 
             resValue("string", "release_name", "v$versionName")
             resValue("integer", "release_code", versionCode.toString())
