@@ -2,6 +2,7 @@
 import java.net.URI //新语法需要
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.TimeUnit //计算geofile下载时间需要
 
 plugins {
     kotlin("android")
@@ -57,9 +58,11 @@ tasks.register("downloadGeoFiles") {
             val url = URI(downloadUrl).toURL()
 
             val outputPath = file("$geoFilesDownloadDir/$outputFileName")
+            val oneMonthInMillis = TimeUnit.DAYS.toMillis(30)  // 定義一個月的毫秒數（以 30 天計算）
+            val fileAge = System.currentTimeMillis() - outputPath.lastModified()
 
-            if (outputPath.exists() && outputPath.length() > 0) {
-                println("$outputFileName already exists, skipping download.")
+            if (outputPath.exists() && outputPath.length() > 0 && fileAge <= oneMonthInMillis) { // 如果檔案存在、大小大於 0，且下載時間在一個月內，才跳過下載
+                println("$outputFileName already exists and is up to date, skipping download.")
                 return@forEach
             }
 
@@ -88,7 +91,6 @@ tasks.getByName("clean", type = Delete::class) {
 
 configure<com.android.build.api.dsl.ApplicationExtension> {
     androidResources {
-        // 最新的語系過濾 API，絕不報錯與棄用
-        localeFilters.addAll(listOf("en", "zh-rTW", "zh"))
+        localeFilters.addAll(listOf("en", "zh-rTW", "zh"))  // 最新的語系過濾 API
     }
 }

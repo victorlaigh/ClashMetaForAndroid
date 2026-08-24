@@ -67,12 +67,14 @@ subprojects {
 
             ndk {
                 abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                //abiFilters += listOf("arm64-v8a")
             }
 
             externalNativeBuild {
                 cmake {
                     //abiFilters("arm64-v8a", "armeabi-v7a", "x86", "x86_64") 换了新写法适应新版AGP
                     abiFilters += setOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                    //abiFilters += setOf("arm64-v8a")
                 }
             }
 
