@@ -5,6 +5,7 @@ build/
 /app/foss/release
 /app/premium/release
 /captures
+/app/alpha/release
 
 # Ignore Gradle GUI config
 gradle-app.setting
