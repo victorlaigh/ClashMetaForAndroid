@@ -22,6 +22,7 @@ import com.github.kr328.clash.util.startClashService
 import com.github.kr328.clash.util.stopClashService
 import com.github.kr328.clash.util.withClash
 import com.github.kr328.clash.util.withProfile
+import com.github.kr328.clash.design.util.resolveThemedColor
 import com.github.kr328.clash.design.util.showExceptionToast
 import com.github.kr328.clash.core.bridge.*
 import com.github.kr328.clash.service.model.Profile
@@ -49,20 +50,7 @@ class MainActivity : BaseActivity<MainDesign>() {
 
         setContentDesign(design)
         
-
-        val adView = AdView(this)
-        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test banner ID
-        adView.setAdSize(AdSize.BANNER)
-        adView.adListener = object : AdListener() {
-            override fun onAdFailedToLoad(error: LoadAdError) {
-                Log.d("AdMob: failed to load: ${error.message}")
-            }
-            override fun onAdLoaded() {
-                Log.d("AdMob: loaded successfully")
-            }
-        }
-        design.adContainer.addView(adView)
-        adView.loadAd(AdRequest.Builder().build())
+        loadAds(design)
 
         design.fetch()
 
@@ -107,6 +95,8 @@ class MainActivity : BaseActivity<MainDesign>() {
                             startActivity(HelpActivity::class.intent)
                         MainDesign.Request.OpenAbout ->
                             design.showAbout(queryAppVersionName())
+                        MainDesign.Request.ReloadAds ->
+                            loadAds(design)
                     }
                 }
                 if (clashRunning) {
@@ -116,6 +106,27 @@ class MainActivity : BaseActivity<MainDesign>() {
                 }
             }
         }
+    }
+
+    private fun loadAds(design: MainDesign) {
+        design.adContainer.removeAllViews()
+
+        val adView = AdView(this)
+        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test banner ID
+        adView.setAdSize(AdSize.BANNER)
+        adView.adListener = object : AdListener() {
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                Log.d("AdMob: failed to load: ${error.message}")
+                design.adContainer.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            }
+            override fun onAdLoaded() {
+                Log.d("AdMob: loaded successfully")
+                val color = resolveThemedColor(android.R.attr.windowBackground)
+                design.adContainer.setBackgroundColor(color)
+            }
+        }
+        design.adContainer.addView(adView)
+        adView.loadAd(AdRequest.Builder().build())
     }
 
     private suspend fun MainDesign.fetch() {

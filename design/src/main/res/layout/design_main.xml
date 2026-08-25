@@ -158,19 +158,38 @@
                     android:textColor="?attr/colorPrimary" />
 
                 <FrameLayout
-                    android:id="@+id/ad_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/main_label_margin_vertical"
                     android:minHeight="50dp">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/google_connection_failed"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                        android:alpha="0.5" />
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.5"
+                            android:text="@string/google_connection_failed"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+
+                        <com.google.android.material.button.MaterialButton
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:onClick="@{() -> self.request(Request.ReloadAds)}"
+                            android:text="@string/retry"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/ad_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
                 </FrameLayout>
             </LinearLayout>
         </ScrollView>
