@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.google.material)
     implementation(libs.quickie.bundled)
+    implementation(libs.google.ads)
     implementation(libs.androidx.activity.ktx)
 }
 

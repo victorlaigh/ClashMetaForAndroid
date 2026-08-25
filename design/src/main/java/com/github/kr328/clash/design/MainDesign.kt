@@ -31,6 +31,9 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
     override val root: View
         get() = binding.root
 
+    val adContainer: android.view.ViewGroup
+        get() = binding.adContainer
+
     suspend fun setProfileName(name: String?) {
         withContext(Dispatchers.Main) {
             binding.profileName = name

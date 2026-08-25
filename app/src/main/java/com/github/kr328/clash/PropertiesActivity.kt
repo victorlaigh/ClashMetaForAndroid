@@ -93,7 +93,7 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
                                         aFile.writeText(content)
 
                                         try {
-                                            YamlUtils.mergeYaml(aFile, configFile)
+                                            YamlUtils.mergeYaml(aFile, configFile, packageName)
                                         } catch (_: Exception) {
                                             mergeError = true
                                         }
@@ -105,7 +105,7 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
                                         aFile.writeText(content)
 
                                         try {
-                                            YamlUtils.mergeYaml(aFile, configFile)
+                                            YamlUtils.mergeYaml(aFile, configFile, packageName)
                                         } catch (_: Exception) {
                                             mergeError = true
                                         }
@@ -174,7 +174,7 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
                                         YamlUtils.resetRaw(configFile)
                                         if (aFile.exists()) {
                                             try {
-                                                YamlUtils.mergeYaml(aFile, configFile)
+                                                YamlUtils.mergeYaml(aFile, configFile, packageName)
                                             } catch (_: Exception) {
                                             }
                                         }

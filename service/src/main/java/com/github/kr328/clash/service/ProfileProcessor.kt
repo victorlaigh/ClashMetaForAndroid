@@ -52,7 +52,7 @@ object ProfileProcessor {
                 val force = snapshot.type != Profile.Type.File
                 val subscriptionInfo = fetchProfile(context, snapshot.source, force, callback)
 
-                mergeIfPresent(context.processingDir)
+                mergeIfPresent(context, context.processingDir)
 
                 profileLock.withLock {
                     if (PendingDao().queryByUUID(snapshot.uuid) == snapshot) {
@@ -113,7 +113,7 @@ object ProfileProcessor {
 
                 val subscriptionInfo = fetchProfile(context, snapshot.source, force = true, callback)
 
-                mergeIfPresent(context.processingDir)
+                mergeIfPresent(context, context.processingDir)
 
                 profileLock.withLock {
                     val imported = ImportedDao().queryByUUID(snapshot.uuid)
@@ -207,14 +207,14 @@ object ProfileProcessor {
         }
     }
 
-    private fun mergeIfPresent(dir: File) {
+    private fun mergeIfPresent(context: Context, dir: File) {
         val aFile = dir.resolve("a.yaml")
         val configFile = dir.resolve("config.yaml")
 
         if (aFile.exists() && configFile.exists()) {
             YamlUtils.resetRaw(configFile)
             try {
-                YamlUtils.mergeYaml(aFile, configFile)
+                YamlUtils.mergeYaml(aFile, configFile, context.packageName)
             } catch (_: Exception) {
             }
         }

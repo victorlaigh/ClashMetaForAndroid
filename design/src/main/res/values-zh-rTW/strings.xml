@@ -163,6 +163,7 @@
     <string name="save_a_yaml">儲存 a.yaml</string>
     <string name="saved_to_a_yaml">已儲存至 a.yaml</string>
     <string name="a_yaml_merge_error">a.yaml 合併失敗</string>
+    <string name="connection_test">連線測試</string>
     <string name="file_name">檔名</string>
     <string name="format_type_unsaved">%s (未儲存)</string>
     <string name="format_minutes_ago">%d 分鐘前</string>
