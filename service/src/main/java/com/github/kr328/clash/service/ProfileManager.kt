@@ -14,6 +14,11 @@ import com.github.kr328.clash.service.util.generateProfileUUID
 import com.github.kr328.clash.service.util.importedDir
 import com.github.kr328.clash.service.util.pendingDir
 import com.github.kr328.clash.service.util.sendProfileChanged
+import com.github.kr328.clash.common.log.Log
+import com.github.kr328.clash.common.constants.Intents
+import com.github.kr328.clash.common.util.componentName
+import com.github.kr328.clash.common.util.setUUID
+import android.content.Intent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,14 +41,23 @@ class ProfileManager(private val context: Context) : IProfileManager,
     }
 
     private suspend fun bootstrap() {
-        val all = queryAll()
+        val imported = ImportedDao().queryAllUUIDs()
+        val active = queryActive()
 
-        if (all.isEmpty()) {
+        Log.d("ProfileManager: bootstrap started, imported count = ${imported.size}, active = ${active?.uuid}")
+
+        if (imported.isEmpty() && active == null) {
             val url = context.getString(R.string.default_profile_url)
             val name = context.getString(R.string.default_profile_name)
 
+            Log.d("ProfileManager: default url = '$url'")
+
             if (url.isNotBlank()) {
-                val uuid = create(Profile.Type.Url, name, url)
+                val all = queryAll()
+                val targetProfile = all.find { it.source == url }
+                val uuid = targetProfile?.uuid ?: create(Profile.Type.Url, name, url)
+
+                Log.d("ProfileManager: using profile $uuid")
 
                 val aYamlContent = context.getString(R.string.default_a_yaml_content)
                 if (aYamlContent.isNotBlank()) {
@@ -53,6 +67,11 @@ class ProfileManager(private val context: Context) : IProfileManager,
                 val profile = queryByUUID(uuid)
                 if (profile != null) {
                     setActive(profile)
+                    Log.d("ProfileManager: set active default profile")
+                    
+                    // Trigger silent auto-download
+                    update(uuid)
+                    Log.d("ProfileManager: triggered silent auto-download for $uuid")
                 }
             }
         }
@@ -189,7 +208,7 @@ class ProfileManager(private val context: Context) : IProfileManager,
     override suspend fun queryActive(): Profile? {
         val active = store.activeProfile ?: return null
 
-        return if (ImportedDao().exists(active)) {
+        return if (ImportedDao().exists(active) || PendingDao().exists(active)) {
             resolveProfile(active)
         } else {
             null
@@ -204,22 +223,24 @@ class ProfileManager(private val context: Context) : IProfileManager,
         val imported = ImportedDao().queryByUUID(uuid)
         val pending = PendingDao().queryByUUID(uuid)
 
+        if (imported == null && pending == null) return null
+
         val active = store.activeProfile
-        val name = pending?.name ?: imported?.name ?: return null
-        val type = pending?.type ?: imported?.type ?: return null
-        val source = pending?.source ?: imported?.source ?: return null
-        val interval = pending?.interval ?: imported?.interval ?: return null
-        val upload = pending?.upload ?: imported?.upload ?: return null
-        val download = pending?.download ?: imported?.download ?: return null
-        val total = pending?.total ?: imported?.total ?: return null
-        val expire = pending?.expire ?: imported?.expire ?: return null
+        val name = pending?.name ?: imported?.name ?: ""
+        val type = pending?.type ?: imported?.type ?: Profile.Type.File
+        val source = pending?.source ?: imported?.source ?: ""
+        val interval = pending?.interval ?: imported?.interval ?: 0
+        val upload = pending?.upload ?: imported?.upload ?: 0
+        val download = pending?.download ?: imported?.download ?: 0
+        val total = pending?.total ?: imported?.total ?: 0
+        val expire = pending?.expire ?: imported?.expire ?: 0
 
         return Profile(
             uuid = uuid,
             name = name,
             type = type,
             source = source,
-            active = active != null && imported?.uuid == active,
+            active = active != null && (imported?.uuid == active || pending?.uuid == active),
             interval = interval,
             upload = upload,
             download = download,
@@ -228,7 +249,7 @@ class ProfileManager(private val context: Context) : IProfileManager,
             updatedAt = resolveUpdatedAt(uuid),
             imported = imported != null,
             pending = pending != null,
-            ageSecretKey = if (pending != null) pending.ageSecretKey else imported?.ageSecretKey,
+            ageSecretKey = pending?.ageSecretKey ?: imported?.ageSecretKey,
         )
     }
 
@@ -251,12 +272,18 @@ class ProfileManager(private val context: Context) : IProfileManager,
     }
 
     private suspend fun scheduleUpdate(uuid: UUID, startImmediately: Boolean) {
-        val imported = ImportedDao().queryByUUID(uuid) ?: return
+        val imported = ImportedDao().queryByUUID(uuid)
 
         if (startImmediately) {
-            ProfileReceiver.schedule(context, imported)
+            val intent = Intent(Intents.ACTION_PROFILE_REQUEST_UPDATE)
+                .setComponent(ProfileReceiver::class.componentName)
+                .setUUID(uuid)
+
+            context.sendBroadcast(intent)
         } else {
-            ProfileReceiver.scheduleNext(context, imported)
+            if (imported != null) {
+                ProfileReceiver.scheduleNext(context, imported)
+            }
         }
     }
 }

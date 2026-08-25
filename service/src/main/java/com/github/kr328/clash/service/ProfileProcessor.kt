@@ -196,7 +196,7 @@ object ProfileProcessor {
     suspend fun active(context: Context, uuid: UUID) {
         withContext(NonCancellable) {
             profileLock.withLock {
-                if (ImportedDao().exists(uuid)) {
+                if (ImportedDao().exists(uuid) || PendingDao().exists(uuid)) {
                     val store = ServiceStore(context)
 
                     store.activeProfile = uuid

@@ -172,6 +172,7 @@
     <string name="saved_to_a_yaml">已保存至 a.yaml</string>
     <string name="a_yaml_merge_error">a.yaml 合并失败</string>
     <string name="connection_test">连接测试</string>
+    <string name="google_connection_failed">未能连接Google</string>
     <string name="rules_label">自定义规则：</string>
     <string name="file_name">文件名</string>
     <string name="format_type_unsaved">%s (未保存)</string>
@@ -229,7 +230,7 @@
     <string name="version_updated">应用已更新</string>
     <string name="version_updated_tips">设置已被清除，旧的配置文件需要再次保存。</string>
     <string name="active_unsaved_tips">配置文件需要在激活之前保存</string>
-    <string name="bootstrap_initial_update">默认订阅已创建，点击下载配置文件。</string>
+    <string name="bootstrap_initial_update">自动下载配置失败，点击手动下载</string>
     <string name="mode_switch_tips">仅在本次会话中有效</string>
     <string name="import_">导入</string>
     <string name="sources">源代码</string>

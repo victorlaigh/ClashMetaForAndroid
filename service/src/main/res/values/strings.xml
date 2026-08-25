@@ -22,6 +22,6 @@
     <string name="profile_updating">Profile Updating</string>
 
     <string name="default_profile_name" translatable="false">Default Profile</string>
-    <string name="default_profile_url" translatable="false"></string>
+    <string name="default_profile_url" translatable="false">这边放默认订阅地址</string>
     <string name="default_a_yaml_content" translatable="false"></string>
 </resources>

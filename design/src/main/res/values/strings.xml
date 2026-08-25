@@ -82,7 +82,7 @@
     <string name="properties">Properties</string>
     <string name="duplicate">Duplicate</string>
     <string name="active_unsaved_tips">Profile needs to be saved before activation</string>
-    <string name="bootstrap_initial_update">Default profile created. Tap to download configuration.</string>
+    <string name="bootstrap_initial_update">Automatic download failed. Tap to download manually.</string>
 
     <string name="exit_without_save">Exit without Save</string>
     <string name="exit_without_save_warning">All changed will *LOST*</string>
@@ -281,6 +281,7 @@
     <string name="saved_to_a_yaml">Saved to a.yaml</string>
     <string name="a_yaml_merge_error">a.yaml merge failed</string>
     <string name="connection_test">Connection Test</string>
+    <string name="google_connection_failed">Unable to connect to Google</string>
     <string name="rules_label">Rules:</string>
     <string name="file_name">File Name</string>
     <string name="invalid_file_name">Invalid file name</string>

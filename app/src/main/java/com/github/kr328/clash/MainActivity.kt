@@ -13,6 +13,7 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.github.kr328.clash.common.constants.Intents
+import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.common.util.intent
 import com.github.kr328.clash.common.util.ticker
 import com.github.kr328.clash.design.MainDesign
@@ -21,29 +22,45 @@ import com.github.kr328.clash.util.startClashService
 import com.github.kr328.clash.util.stopClashService
 import com.github.kr328.clash.util.withClash
 import com.github.kr328.clash.util.withProfile
+import com.github.kr328.clash.design.util.showExceptionToast
 import com.github.kr328.clash.core.bridge.*
 import com.github.kr328.clash.service.model.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
+import java.util.*
 import java.util.concurrent.TimeUnit
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.github.kr328.clash.design.R as DesignR
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.LoadAdError
 import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<MainDesign>() {
+    private var isBootstrapToastShowing = false
+    private var isUpdatingBootstrap = false
+
     override suspend fun main() {
         val design = MainDesign(this)
 
         setContentDesign(design)
+        
 
         val adView = AdView(this)
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test banner ID
         adView.setAdSize(AdSize.BANNER)
+        adView.adListener = object : AdListener() {
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                Log.d("AdMob: failed to load: ${error.message}")
+            }
+            override fun onAdLoaded() {
+                Log.d("AdMob: loaded successfully")
+            }
+        }
         design.adContainer.addView(adView)
         adView.loadAd(AdRequest.Builder().build())
 
@@ -58,7 +75,8 @@ class MainActivity : BaseActivity<MainDesign>() {
                         Event.ActivityStart,
                         Event.ServiceRecreated,
                         Event.ClashStop, Event.ClashStart,
-                        Event.ProfileLoaded, Event.ProfileChanged -> design.fetch()
+                        Event.ProfileLoaded, Event.ProfileChanged,
+                        Event.ProfileUpdateCompleted, Event.ProfileUpdateFailed -> design.fetch()
                         else -> Unit
                     }
                 }
@@ -117,11 +135,24 @@ class MainActivity : BaseActivity<MainDesign>() {
             val active = queryActive()
             setProfileName(active?.name)
 
-            if (active != null && !active.imported && active.type == Profile.Type.Url) {
-                showToast(DesignR.string.bootstrap_initial_update, ToastDuration.Long) {
+            if (active != null && !active.imported && active.type == Profile.Type.Url && !isBootstrapToastShowing && !isUpdatingBootstrap) {
+                isBootstrapToastShowing = true
+                showToast(DesignR.string.bootstrap_initial_update, ToastDuration.Indefinite) {
+                    addCallback(object : com.google.android.material.snackbar.Snackbar.Callback() {
+                        override fun onDismissed(transientBottomBar: com.google.android.material.snackbar.Snackbar?, event: Int) {
+                            isBootstrapToastShowing = false
+                        }
+                    })
                     setAction(DesignR.string.update) {
                         launch {
-                            withProfile { update(active.uuid) }
+                            try {
+                                isUpdatingBootstrap = true
+                                showToast(DesignR.string.loading, ToastDuration.Short)
+                                withProfile { update(active.uuid) }
+                            } catch (e: Exception) {
+                                isUpdatingBootstrap = false
+                                this@fetch.showExceptionToast(e)
+                            }
                         }
                     }
                 }
@@ -162,6 +193,42 @@ class MainActivity : BaseActivity<MainDesign>() {
             }
         } catch (e: Exception) {
             design?.showToast(DesignR.string.unable_to_start_vpn, ToastDuration.Long)
+        }
+    }
+
+    override fun onProfileUpdateCompleted(uuid: UUID?) {
+        super.onProfileUpdateCompleted(uuid)
+
+        isUpdatingBootstrap = false
+
+        launch {
+            val active = withProfile { queryActive() }
+            if (active?.uuid == uuid && active?.imported == true) {
+                // Should automatically happen via fetch(), but good to be explicit
+                design?.fetch()
+            }
+        }
+    }
+
+    override fun onProfileUpdateFailed(uuid: UUID?, reason: String?) {
+        super.onProfileUpdateFailed(uuid, reason)
+
+        isUpdatingBootstrap = false
+        isBootstrapToastShowing = false
+
+        launch {
+            // Show error as a dialog instead of Snackbar to avoid dismissing the bootstrap prompt
+            withContext(Dispatchers.Main) {
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle(DesignR.string.error)
+                    .setMessage(reason ?: "Unknown")
+                    .setPositiveButton(DesignR.string.ok) { _, _ ->
+                        // Re-trigger fetch to show the bootstrap prompt again after dialog is closed
+                        launch { design?.fetch() }
+                    }
+                    .setCancelable(false)
+                    .show()
+            }
         }
     }
 

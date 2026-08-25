@@ -164,6 +164,7 @@
     <string name="saved_to_a_yaml">已儲存至 a.yaml</string>
     <string name="a_yaml_merge_error">a.yaml 合併失敗</string>
     <string name="connection_test">連線測試</string>
+    <string name="google_connection_failed">未能連線 Google</string>
     <string name="file_name">檔名</string>
     <string name="format_type_unsaved">%s (未儲存)</string>
     <string name="format_minutes_ago">%d 分鐘前</string>
@@ -219,6 +220,7 @@
     <string name="version_updated">應用已更新</string>
     <string name="version_updated_tips">設定已被清除，舊版設定檔需要再次儲存。</string>
     <string name="active_unsaved_tips">設定檔需要在啟用之前儲存</string>
+    <string name="bootstrap_initial_update">自動下載配置失敗，點擊手動下載</string>
     <string name="mode_switch_tips">僅在本次工作階段中有效</string>
     <string name="import_">匯入</string>
     <string name="sources">原始碼</string>

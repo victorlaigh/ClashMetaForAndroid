@@ -21,6 +21,7 @@ import com.github.kr328.clash.design.R
 
 class PropertiesActivity : BaseActivity<PropertiesDesign>() {
     private var canceled: Boolean = false
+    private var isCommitted: Boolean = false
     private lateinit var original: Profile
 
     override suspend fun main() {
@@ -45,9 +46,9 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
         setContentDesign(design)
 
         defer {
-            canceled = true
-
-            withProfile { release(uuid) }
+            if (!isCommitted && original.pending && !original.imported && !original.active && original.source.isBlank()) {
+                withProfile { release(uuid) }
+            }
         }
 
         while (isActive) {
@@ -183,6 +184,8 @@ class PropertiesActivity : BaseActivity<PropertiesDesign>() {
                             }
                         }
                     }
+
+                    isCommitted = true
 
                     setResult(RESULT_OK)
 

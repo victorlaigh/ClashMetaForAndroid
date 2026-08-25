@@ -16,6 +16,7 @@ import com.github.kr328.clash.common.id.UndefinedIds
 import com.github.kr328.clash.common.util.setUUID
 import com.github.kr328.clash.common.util.uuid
 import com.github.kr328.clash.service.data.ImportedDao
+import com.github.kr328.clash.service.data.PendingDao
 import com.github.kr328.clash.service.util.sendProfileUpdateCompleted
 import com.github.kr328.clash.service.util.sendProfileUpdateFailed
 import kotlinx.coroutines.*
@@ -80,18 +81,30 @@ class ProfileWorker : BaseService() {
     }
 
     private suspend fun run(uuid: UUID) {
-        val imported = ImportedDao().queryByUUID(uuid) ?: return
+        val imported = ImportedDao().queryByUUID(uuid)
+        val pending = PendingDao().queryByUUID(uuid)
+
+        if (imported == null && pending == null) return
+
+        val name = imported?.name ?: pending?.name ?: "Unknown"
 
         try {
-            processing(imported.name) {
-                ProfileProcessor.update(this, imported.uuid, null)
+            processing(name) {
+                if (imported != null) {
+                    ProfileProcessor.update(this, imported.uuid, null)
+                } else {
+                    ProfileProcessor.apply(this, pending!!.uuid, null)
+                }
             }
 
-            completed(imported.uuid, imported.name)
+            completed(uuid, name)
 
-            ProfileReceiver.scheduleNext(this, imported)
+            val updated = ImportedDao().queryByUUID(uuid)
+            if (updated != null) {
+                ProfileReceiver.scheduleNext(this, updated)
+            }
         } catch (e: Exception) {
-            failed(imported.uuid, imported.name, e.message ?: "Unknown")
+            failed(uuid, name, e.message ?: "Unknown")
         }
     }
 
