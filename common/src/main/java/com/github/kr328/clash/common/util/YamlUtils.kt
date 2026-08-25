@@ -28,7 +28,7 @@ object YamlUtils {
         return Yaml(SafeConstructor(loaderOptions), Representer(dumperOptions), dumperOptions, loaderOptions)
     }
 
-    fun mergeYaml(aFile: File, configFile: File, packageName: String? = null) {
+    fun mergeYaml(aFile: File, configFile: File) {
         if (!aFile.exists() || !configFile.exists()) return
 
         val yaml = createYaml()
@@ -71,20 +71,7 @@ object YamlUtils {
             }
 
             // 4. Perform merge (a.yaml overrides/adds to the raw config)
-            val merged = mergeMaps(aContent, configContent).toMutableMap()
-
-            // 4.5 Inject PACKAGE-NAME rule for connection test
-            if (packageName != null) {
-                val rules = (merged["rules"] as? List<*>)?.toMutableList() ?: mutableListOf<Any?>()
-                val injectRule = "PACKAGE-NAME,$packageName,PROXY"
-                
-                // Remove if already exists to avoid duplication
-                rules.remove(injectRule)
-                // Insert at the very top (index 0)
-                rules.add(0, injectRule)
-                
-                merged["rules"] = rules
-            }
+            val merged = mergeMaps(aContent, configContent)
             
             // 5. Write back to the ACTIVE configFile
             configFile.writeText(yaml.dump(merged), StandardCharsets.UTF_8)
