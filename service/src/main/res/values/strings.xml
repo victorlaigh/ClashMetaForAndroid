@@ -20,4 +20,8 @@
     <string name="provider_files">Provider Files</string>
     <string name="profile_updater">Profile Updater</string>
     <string name="profile_updating">Profile Updating</string>
+
+    <string name="default_profile_name" translatable="false">Default Profile</string>
+    <string name="default_profile_url" translatable="false"></string>
+    <string name="default_a_yaml_content" translatable="false"></string>
 </resources>

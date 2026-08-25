@@ -229,6 +229,7 @@
     <string name="version_updated">应用已更新</string>
     <string name="version_updated_tips">设置已被清除，旧的配置文件需要再次保存。</string>
     <string name="active_unsaved_tips">配置文件需要在激活之前保存</string>
+    <string name="bootstrap_initial_update">默认订阅已创建，点击下载配置文件。</string>
     <string name="mode_switch_tips">仅在本次会话中有效</string>
     <string name="import_">导入</string>
     <string name="sources">源代码</string>

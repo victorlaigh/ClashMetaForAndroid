@@ -82,6 +82,7 @@
     <string name="properties">Properties</string>
     <string name="duplicate">Duplicate</string>
     <string name="active_unsaved_tips">Profile needs to be saved before activation</string>
+    <string name="bootstrap_initial_update">Default profile created. Tap to download configuration.</string>
 
     <string name="exit_without_save">Exit without Save</string>
     <string name="exit_without_save_warning">All changed will *LOST*</string>

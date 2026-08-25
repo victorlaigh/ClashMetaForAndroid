@@ -29,7 +29,32 @@ class ProfileManager(private val context: Context) : IProfileManager,
         launch {
             Database.database //.init
 
+            bootstrap()
+
             ProfileReceiver.rescheduleAll(context)
+        }
+    }
+
+    private suspend fun bootstrap() {
+        val all = queryAll()
+
+        if (all.isEmpty()) {
+            val url = context.getString(R.string.default_profile_url)
+            val name = context.getString(R.string.default_profile_name)
+
+            if (url.isNotBlank()) {
+                val uuid = create(Profile.Type.Url, name, url)
+
+                val aYamlContent = context.getString(R.string.default_a_yaml_content)
+                if (aYamlContent.isNotBlank()) {
+                    context.pendingDir.resolve(uuid.toString()).resolve("a.yaml").writeText(aYamlContent)
+                }
+
+                val profile = queryByUUID(uuid)
+                if (profile != null) {
+                    setActive(profile)
+                }
+            }
         }
     }
 

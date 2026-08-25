@@ -22,6 +22,7 @@ import com.github.kr328.clash.util.stopClashService
 import com.github.kr328.clash.util.withClash
 import com.github.kr328.clash.util.withProfile
 import com.github.kr328.clash.core.bridge.*
+import com.github.kr328.clash.service.model.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.selects.select
@@ -32,6 +33,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.github.kr328.clash.design.R as DesignR
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<MainDesign>() {
     override suspend fun main() {
@@ -112,7 +114,18 @@ class MainActivity : BaseActivity<MainDesign>() {
         setHasProviders(providers.isNotEmpty())
 
         withProfile {
-            setProfileName(queryActive()?.name)
+            val active = queryActive()
+            setProfileName(active?.name)
+
+            if (active != null && !active.imported && active.type == Profile.Type.Url) {
+                showToast(DesignR.string.bootstrap_initial_update, ToastDuration.Long) {
+                    setAction(DesignR.string.update) {
+                        launch {
+                            withProfile { update(active.uuid) }
+                        }
+                    }
+                }
+            }
         }
     }
 
