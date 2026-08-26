@@ -37,12 +37,13 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.github.kr328.clash.design.R as DesignR
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.LoadAdError
 import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<MainDesign>() {
-    private var isBootstrapToastShowing = false
+    private var bootstrapSnackbar: Snackbar? = null
     private var isUpdatingBootstrap = false
 
     override suspend fun main() {
@@ -62,9 +63,12 @@ class MainActivity : BaseActivity<MainDesign>() {
                     when (it) {
                         Event.ActivityStart,
                         Event.ServiceRecreated,
-                        Event.ClashStop, Event.ClashStart,
                         Event.ProfileLoaded, Event.ProfileChanged,
-                        Event.ProfileUpdateCompleted, Event.ProfileUpdateFailed -> design.fetch()
+                        Event.ClashStop, Event.ClashStart,
+                        Event.ProfileUpdateCompleted, Event.ProfileUpdateFailed -> {
+                            design.fetch()
+                            loadAds(design)
+                        }
                         else -> Unit
                     }
                 }
@@ -143,30 +147,39 @@ class MainActivity : BaseActivity<MainDesign>() {
         setHasProviders(providers.isNotEmpty())
 
         withProfile {
+            val all = queryAll()
             val active = queryActive()
             setProfileName(active?.name)
 
-            if (active != null && !active.imported && active.type == Profile.Type.Url && !isBootstrapToastShowing && !isUpdatingBootstrap) {
-                isBootstrapToastShowing = true
-                showToast(DesignR.string.bootstrap_initial_update, ToastDuration.Indefinite) {
-                    addCallback(object : com.google.android.material.snackbar.Snackbar.Callback() {
-                        override fun onDismissed(transientBottomBar: com.google.android.material.snackbar.Snackbar?, event: Int) {
-                            isBootstrapToastShowing = false
-                        }
-                    })
-                    setAction(DesignR.string.update) {
-                        launch {
-                            try {
-                                isUpdatingBootstrap = true
-                                showToast(DesignR.string.loading, ToastDuration.Short)
-                                withProfile { update(active.uuid) }
-                            } catch (e: Exception) {
-                                isUpdatingBootstrap = false
-                                this@fetch.showExceptionToast(e)
+            val shouldShowBootstrap = all.size <= 1 && active != null && !active.imported && active.type == Profile.Type.Url && !isUpdatingBootstrap
+
+            if (shouldShowBootstrap) {
+                if (bootstrapSnackbar == null) {
+                    bootstrapSnackbar = showToast(DesignR.string.bootstrap_initial_update, ToastDuration.Indefinite) {
+                        addCallback(object : Snackbar.Callback() {
+                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                                if (bootstrapSnackbar == transientBottomBar) {
+                                    bootstrapSnackbar = null
+                                }
+                            }
+                        })
+                        setAction(DesignR.string.update) {
+                            launch {
+                                try {
+                                    isUpdatingBootstrap = true
+                                    showToast(DesignR.string.loading, ToastDuration.Short)
+                                    withProfile { update(active.uuid) }
+                                } catch (e: Exception) {
+                                    isUpdatingBootstrap = false
+                                    this@fetch.showExceptionToast(e)
+                                }
                             }
                         }
                     }
                 }
+            } else {
+                bootstrapSnackbar?.dismiss()
+                bootstrapSnackbar = null
             }
         }
     }
@@ -211,6 +224,8 @@ class MainActivity : BaseActivity<MainDesign>() {
         super.onProfileUpdateCompleted(uuid)
 
         isUpdatingBootstrap = false
+        bootstrapSnackbar?.dismiss()
+        bootstrapSnackbar = null
 
         launch {
             val active = withProfile { queryActive() }
@@ -225,7 +240,8 @@ class MainActivity : BaseActivity<MainDesign>() {
         super.onProfileUpdateFailed(uuid, reason)
 
         isUpdatingBootstrap = false
-        isBootstrapToastShowing = false
+        bootstrapSnackbar?.dismiss()
+        bootstrapSnackbar = null
 
         launch {
             // Show error as a dialog instead of Snackbar to avoid dismissing the bootstrap prompt

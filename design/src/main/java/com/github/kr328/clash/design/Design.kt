@@ -23,7 +23,7 @@ abstract class Design<R>(val context: Context) :
         resId: Int,
         duration: ToastDuration,
         configure: Snackbar.() -> Unit = {}
-    ) {
+    ): Snackbar {
         return showToast(context.getString(resId), duration, configure)
     }
 
@@ -31,9 +31,9 @@ abstract class Design<R>(val context: Context) :
         message: CharSequence,
         duration: ToastDuration,
         configure: Snackbar.() -> Unit = {}
-    ) {
-        withContext(Dispatchers.Main) {
-            Snackbar.make(
+    ): Snackbar {
+        return withContext(Dispatchers.Main) {
+            val snackbar = Snackbar.make(
                 root,
                 message,
                 when (duration) {
@@ -41,7 +41,11 @@ abstract class Design<R>(val context: Context) :
                     ToastDuration.Long -> Snackbar.LENGTH_LONG
                     ToastDuration.Indefinite -> Snackbar.LENGTH_INDEFINITE
                 }
-            ).apply(configure).show()
+            ).apply(configure)
+            
+            snackbar.show()
+            
+            snackbar
         }
     }
 
